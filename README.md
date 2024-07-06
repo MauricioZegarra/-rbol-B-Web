@@ -1,4 +1,5 @@
 Comandos en su directorio:
 
-npm init -y
-npm install express
+1. npm init -y;
+
+2. npm install express;
