@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Graficador de Árbol B</title>
+    <script>
+        async function insertNode() {
+            const value = document.getElementById('insertValue').value;
+            const response = await fetch(`/insert/${value}`, { method: 'POST' });
+            if (response.ok) {
+                const preorden = await response.text();
+                document.getElementById('treeDisplay').textContent = preorden;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Graficador de Árbol B</h1>
+    <div>
+        <h2>Insertar Nodo</h2>
+        <input type="text" id="insertValue" />
+        <button onclick="insertNode()">Insertar</button>
+    </div>
+    <div id="treeDisplay"></div>
+</body>
+</html>
