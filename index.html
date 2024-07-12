@@ -4,77 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>B-Tree Visualization</title>
-    <style>
-        /* Aquí puedes agregar estilos CSS para la visualización del árbol B */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #tree-container {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-        #controls {
-            margin-top: 20px;
-        }
-    </style>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="tree-container"></div>
-    <div id="controls">
-        <input type="number" id="key" placeholder="Enter key">
-        <button id="insert">Insert</button>
-        <button id="remove">Remove</button>
-        <button id="search">Search</button>
+    <div>
+        <h1>Arbol B programacion de sistemas B</h1>
     </div>
+    <main class="conteniner">
+        <div id="controls">
+            <input type="number" id="order" placeholder="Enter B-Tree order">
+            <button id="create">Create B-Tree</button>
+            <input type="number" id="key" placeholder="Enter key">
+            <button id="insert">Insert</button>
+            <button id="delete">Delete Tree</button>
+        </div>
+        <div id="tree-container"></div>
 
-    <script src="btree.js"></script>
-    <script>
+    </main>
+ 
+
+    <script src="arbol.js"></script>
+    <script src="logica.js"></script>
+  <!--  <script>
         Module.onRuntimeInitialized = () => {
-            const createTree = Module.cwrap('create_tree', 'number', []);
+            const createTree = Module.cwrap('create_tree', 'number', ['number']);
             const insert = Module.cwrap('Insert', null, ['number', 'number']);
-            const remove = Module.cwrap('remove', null, ['number', 'number']); // Asegúrate de que la función remove esté implementada si la necesitas
-            const search = Module.cwrap('search', 'number', ['number', 'number']); // Asegúrate de que la función search esté implementada si la necesitas
             const deleteTree = Module.cwrap('delete_tree', null, ['number']);
-            const toDot = Module.cwrap('to_dot', 'string', ['number']);
+            const toDot = Module.cwrap('to_dot', 'number', ['number']);
+            const freeString = Module.cwrap('free_string', null, ['number']);
 
-            let tree = createTree();
+            let tree = null;
+
+            document.getElementById('create').addEventListener('click', () => {
+                const order = parseInt(document.getElementById('order').value) || 2;
+                if (tree) {
+                    deleteTree(tree);
+                }
+                tree = createTree(order);
+                console.log(`Created B-Tree with order: ${order}`);
+                visualizeTree();
+            });
 
             document.getElementById('insert').addEventListener('click', () => {
+                if (!tree) {
+                    alert('Create a tree first!');
+                    return;
+                }
                 const key = parseInt(document.getElementById('key').value);
                 insert(tree, key);
                 console.log(`Inserted key: ${key}`);
                 visualizeTree();
             });
 
-            document.getElementById('remove').addEventListener('click', () => {
-                const key = parseInt(document.getElementById('key').value);
-                remove(tree, key);
-                console.log(`Removed key: ${key}`);
-                visualizeTree();
-            });
-
-            document.getElementById('search').addEventListener('click', () => {
-                const key = parseInt(document.getElementById('key').value);
-                const result = search(tree, key);
-                console.log(result ? `Key found: ${key}` : `Key not found: ${key}`);
-                alert(result ? "Key found" : "Key not found");
+            document.getElementById('delete').addEventListener('click', () => {
+                if (!tree) {
+                    alert('Create a tree first!');
+                    return;
+                }
+                deleteTree(tree);
+                tree = null;
+                console.log('Tree deleted');
+                document.getElementById('tree-container').innerHTML = '';
             });
 
             function visualizeTree() {
-                const dot = toDot(tree);
-                const viz = new Viz();
-                viz.renderSVGElement(dot)
-                    .then(element => {
-                        const treeContainer = document.getElementById('tree-container');
-                        treeContainer.innerHTML = '';
-                        treeContainer.appendChild(element);
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
+                if (!tree) {
+                    return;
+                }
+                const dotPtr = toDot(tree);
+                if (dotPtr) {
+                    const dot = Module.UTF8ToString(dotPtr);
+                    freeString(dotPtr);
+                    const viz = new Viz();
+                    viz.renderSVGElement(dot)
+                        .then(element => {
+                            const treeContainer = document.getElementById('tree-container');
+                            treeContainer.innerHTML = '';
+                            treeContainer.appendChild(element);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                }
             }
 
             window.addEventListener('unload', () => {
@@ -83,7 +97,6 @@
                 }
             });
         };
-    </script>
+    </script>-->
 </body>
 </html>
-
