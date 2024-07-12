@@ -10,7 +10,19 @@
             if (response.ok) {
                 const preorden = await response.text();
                 document.getElementById('treeDisplay').textContent = preorden;
+                document.getElementById('insertValue').value = "";
             }
+            
+        }
+        async function removeNode() {
+            const value = document.getElementById('removeValue').value;
+            const response = await fetch(`/remove/${value}`, { method: 'POST' });
+            if (response.ok) {
+                const preorden = await response.text();
+                document.getElementById('treeDisplay').textContent = preorden;
+                document.getElementById('removeValue').value = "";
+            }
+            
         }
     </script>
 </head>
@@ -20,6 +32,11 @@
         <h2>Insertar Nodo</h2>
         <input type="text" id="insertValue" />
         <button onclick="insertNode()">Insertar</button>
+    </div>
+    <div>
+        <h2>Eliminar Nodo</h2>
+        <input type="text" id="removeValue" />
+        <button onclick="removeNode()">Eliminar</button>
     </div>
     <div id="treeDisplay"></div>
 </body>

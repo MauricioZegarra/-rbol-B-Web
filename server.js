@@ -23,6 +23,19 @@ app.post('/insert/:value', (req, res) => {
         }
     });
 });
+app.post('/remove/:value', (req, res) => {
+    const value = req.params.value;
+    // Colocar la ruta del ejecutable entre comillas
+    exec(`"${executable}" remove ${value}`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error: ${stderr}`);
+            res.status(500).send(stderr);
+        } else {
+            console.log(`Output: ${stdout}`);
+            res.send(stdout); // Envía el preorden después de borrar
+        }
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

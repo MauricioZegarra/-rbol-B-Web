@@ -25,6 +25,17 @@ struct Node {
 
     void serialize(ofstream& out) const;
     void deserialize(ifstream& in);
+    //Funciones para eliminar
+    int FindKey(T value);
+    bool RemoveFromLeaf(int idx);
+    bool RemoveFromNonLeaf(int idx);
+    T GetPredecessor(int idx);
+    T GetSuccessor(int idx);
+    void Fill(int idx);
+    void BorrowFromPrev(int idx);
+    void BorrowFromNext(int idx);
+    void Merge(int idx);
+    bool Remove(T value); 
 };
 
 /////////////////////////////////////////////////////////////
@@ -195,6 +206,185 @@ void Node<T, Order>::deserialize(ifstream& in) {
         }
     }
 }
+template <class T, int Order>
+bool Node<T, Order>::Remove(T value) {
+    int idx = FindKey(value);
+
+    // The key to be removed is present in this node
+    if (idx < NumbersOfKeys && keys[idx] == value) {
+        // If the node is a leaf node
+        if (childs[0] == nullptr)
+            return RemoveFromLeaf(idx);
+        else
+            return RemoveFromNonLeaf(idx);
+    } else {
+        // If the node is a non-leaf node
+        if (childs[0] == nullptr) {
+            std::cout << "The key " << value << " is not present in the tree\n";
+            return false;
+        }
+
+        // The key to be removed is present in the subtree rooted with this node
+        bool flag = ((idx == NumbersOfKeys) ? true : false);
+
+        if (childs[idx]->NumbersOfKeys < (Order + 1) / 2)
+            Fill(idx);
+
+        if (flag && idx > NumbersOfKeys)
+            return childs[idx - 1]->Remove(value);
+        else
+            return childs[idx]->Remove(value);
+    }
+    return false;
+}
+
+// Additional methods for handling various cases...
+
+template <class T, int Order>
+bool Node<T, Order>::RemoveFromLeaf(int idx) {
+    for (int i = idx + 1; i < NumbersOfKeys; ++i)
+        keys[i - 1] = keys[i];
+    NumbersOfKeys--;
+    return true;
+}
+
+template <class T, int Order>
+bool Node<T, Order>::RemoveFromNonLeaf(int idx) {
+    T k = keys[idx];
+
+    if (childs[idx]->NumbersOfKeys >= (Order + 1) / 2) {
+        T pred = GetPredecessor(idx);
+        keys[idx] = pred;
+        return childs[idx]->Remove(pred);
+    } else if (childs[idx + 1]->NumbersOfKeys >= (Order + 1) / 2) {
+        T succ = GetSuccessor(idx);
+        keys[idx] = succ;
+        return childs[idx + 1]->Remove(succ);
+    } else {
+        Merge(idx);
+        return childs[idx]->Remove(k);
+    }
+}
+
+template <class T, int Order>
+T Node<T, Order>::GetPredecessor(int idx) {
+    Node* cur = childs[idx];
+    while (!(cur->childs[0] == nullptr))
+        cur = cur->childs[cur->NumbersOfKeys];
+    return cur->keys[cur->NumbersOfKeys - 1];
+}
+
+template <class T, int Order>
+T Node<T, Order>::GetSuccessor(int idx) {
+    Node* cur = childs[idx + 1];
+    while (!(cur->childs[0] == nullptr))
+        cur = cur->childs[0];
+    return cur->keys[0];
+}
+
+template <class T, int Order>
+void Node<T, Order>::Fill(int idx) {
+    if (idx != 0 && childs[idx - 1]->NumbersOfKeys >= (Order + 1) / 2)
+        BorrowFromPrev(idx);
+    else if (idx != NumbersOfKeys && childs[idx + 1]->NumbersOfKeys >= (Order + 1) / 2)
+        BorrowFromNext(idx);
+    else {
+        if (idx != NumbersOfKeys)
+            Merge(idx);
+        else
+            Merge(idx - 1);
+    }
+    return;
+}
+
+template <class T, int Order>
+void Node<T, Order>::BorrowFromPrev(int idx) {
+    Node* child = childs[idx];
+    Node* sibling = childs[idx - 1];
+
+    for (int i = child->NumbersOfKeys - 1; i >= 0; --i)
+        child->keys[i + 1] = child->keys[i];
+
+    if (!(child->childs[0] == nullptr)) {
+        for (int i = child->NumbersOfKeys; i >= 0; --i)
+            child->childs[i + 1] = child->childs[i];
+    }
+
+    child->keys[0] = keys[idx - 1];
+
+    if (!(child->childs[0] == nullptr))
+        child->childs[0] = sibling->childs[sibling->NumbersOfKeys];
+
+    keys[idx - 1] = sibling->keys[sibling->NumbersOfKeys - 1];
+
+    child->NumbersOfKeys += 1;
+    sibling->NumbersOfKeys -= 1;
+
+    return;
+}
+
+template <class T, int Order>
+void Node<T, Order>::BorrowFromNext(int idx) {
+    Node* child = childs[idx];
+    Node* sibling = childs[idx + 1];
+
+    child->keys[child->NumbersOfKeys] = keys[idx];
+
+    if (!(child->childs[0] == nullptr))
+        child->childs[child->NumbersOfKeys + 1] = sibling->childs[0];
+
+    keys[idx] = sibling->keys[0];
+
+    for (int i = 1; i < sibling->NumbersOfKeys; ++i)
+        sibling->keys[i - 1] = sibling->keys[i];
+
+    if (!(sibling->childs[0] == nullptr)) {
+        for (int i = 1; i <= sibling->NumbersOfKeys; ++i)
+            sibling->childs[i - 1] = sibling->childs[i];
+    }
+
+    child->NumbersOfKeys += 1;
+    sibling->NumbersOfKeys -= 1;
+
+    return;
+}
+
+template <class T, int Order>
+void Node<T, Order>::Merge(int idx) {
+    Node* child = childs[idx];
+    Node* sibling = childs[idx + 1];
+
+    child->keys[(Order - 1) / 2 - 1] = keys[idx];
+
+    for (int i = 0; i < sibling->NumbersOfKeys; ++i)
+        child->keys[i + (Order + 1) / 2] = sibling->keys[i];
+
+    if (!(child->childs[0] == nullptr)) {
+        for (int i = 0; i <= sibling->NumbersOfKeys; ++i)
+            child->childs[i + (Order + 1) / 2] = sibling->childs[i];
+    }
+
+    for (int i = idx + 1; i < NumbersOfKeys; ++i)
+        keys[i - 1] = keys[i];
+
+    for (int i = idx + 2; i <= NumbersOfKeys; ++i)
+        childs[i - 1] = childs[i];
+
+    child->NumbersOfKeys += sibling->NumbersOfKeys + 1;
+    NumbersOfKeys--;
+
+    delete sibling;
+    return;
+}
+
+template <class T, int Order>
+int Node<T, Order>::FindKey(T value) {
+    int idx = 0;
+    while (idx < NumbersOfKeys && keys[idx] < value)
+        ++idx;
+    return idx;
+}
+
 
 /////////////////////////////////////////////////////////////
 
@@ -208,6 +398,7 @@ private:
 public:
     BTree();
     void Insert(T value);
+    bool Remove(T value);
     void Print() const;
     ~BTree();
 
@@ -221,6 +412,26 @@ public:
 template <class T, int Order>
 BTree<T, Order>::BTree() {
     this->Root = nullptr;
+}
+
+template <class T, int Order>
+bool BTree<T, Order>::Remove(T value) {
+    if (!Root) {
+        std::cout << "The tree is empty\n";
+        return false;
+    }
+
+    bool result = Root->Remove(value);
+
+    if (Root->NumbersOfKeys == 0) {
+        Node<T, Order>* tmp = Root;
+        if (Root->childs[0])
+            Root = Root->childs[0];
+        else
+            Root = nullptr;
+        delete tmp;
+    }
+    return result;
 }
 
 template <class T, int Order>
