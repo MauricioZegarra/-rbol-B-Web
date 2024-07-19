@@ -1,102 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B-Tree Visualization</title>
-
+    <title>Árbol B Interactivo</title>
+    <link rel="stylesheet" href="ower.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
-     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div>
-        <h1>Arbol B programacion de sistemas B</h1>
-    </div>
-    <main class="conteniner">
-        <div id="controls">
-            <input type="number" id="order" placeholder="Enter B-Tree order">
-            <button id="create">Create B-Tree</button>
-            <input type="number" id="key" placeholder="Enter key">
-            <button id="insert">Insert</button>
-            <button id="delete">Delete Tree</button>
-        </div>
-        <div id="tree-container"></div>
+    <header>
+        <nav>
+            <button id="menuToggle">Menú</button>
+        </nav>
+        <h1>ARBOLES B</h1>
+        <nav>
+            <button id="shareButton">Compartir</button>
+        </nav>
+    </header>
 
+    <main>
+        <aside id="sidebar">
+            <div class="grupo-control">
+                <h3>Grado</h3>
+                <label for="maxGrado">Grado máximo (3-7):</label>
+                <input type="number" id="maxGrado" min="3" max="7" value="3">
+            </div>
+            <div class="grupo-control">
+                <button  id="create" >crear </button>
+            
+                <button id="delete" >eliminar</button>
+
+            </div>
+            <div class="grupo-control">
+                <h3>Operaciones</h3>
+                <div class="operacion">
+                    <input type="number" id="key" placeholder="Valor">
+                    <button id="botonInsertar" >Insertar</button>
+                </div>
+                <div class="operacion">
+                    <input type="number" id="eliminarValor" placeholder="Valor">
+                    <button id="botonEliminar">Eliminar</button>
+                </div>
+                <div class="operacion">
+                    <input type="number" id="buscarValor" placeholder="Valor">
+                    <button id="botonBuscar">Buscar</button>
+                </div>
+            </div>
+        </aside>
+
+        <section id="contenidoPrincipal">
+      <!-- 
+            <div class="panel-control">
+                <button id="botonDibujar">Dibujar árbol</button>
+                <div class="controles-animacion">
+                    <button id="botonAnimar">Iniciar animación</button>
+                    <div class="control-velocidad">
+                        <label for="sliderVelocidad">Velocidad:</label>
+                        <input type="range" id="sliderVelocidad" min="1" max="100" value="50">
+                    </div>
+                </div>
+            </div>-->
+
+
+            <div id="visualizacionArbol">
+                <div id="tree-container">
+
+                </div>
+                <!-- El arbol ira aqui...:v -->
+            </div>
+            
+        </section>
     </main>
- 
+
+    <footer>
+        <p>&copy; 2024 Árbol B UNSA. Todos los derechos reservados.</p>
+    </footer>
+
 
     <script src="arbol.js"></script>
     <script src="logica.js"></script>
-  <!--  <script>
-        Module.onRuntimeInitialized = () => {
-            const createTree = Module.cwrap('create_tree', 'number', ['number']);
-            const insert = Module.cwrap('Insert', null, ['number', 'number']);
-            const deleteTree = Module.cwrap('delete_tree', null, ['number']);
-            const toDot = Module.cwrap('to_dot', 'number', ['number']);
-            const freeString = Module.cwrap('free_string', null, ['number']);
-
-            let tree = null;
-
-            document.getElementById('create').addEventListener('click', () => {
-                const order = parseInt(document.getElementById('order').value) || 2;
-                if (tree) {
-                    deleteTree(tree);
-                }
-                tree = createTree(order);
-                console.log(`Created B-Tree with order: ${order}`);
-                visualizeTree();
-            });
-
-            document.getElementById('insert').addEventListener('click', () => {
-                if (!tree) {
-                    alert('Create a tree first!');
-                    return;
-                }
-                const key = parseInt(document.getElementById('key').value);
-                insert(tree, key);
-                console.log(`Inserted key: ${key}`);
-                visualizeTree();
-            });
-
-            document.getElementById('delete').addEventListener('click', () => {
-                if (!tree) {
-                    alert('Create a tree first!');
-                    return;
-                }
-                deleteTree(tree);
-                tree = null;
-                console.log('Tree deleted');
-                document.getElementById('tree-container').innerHTML = '';
-            });
-
-            function visualizeTree() {
-                if (!tree) {
-                    return;
-                }
-                const dotPtr = toDot(tree);
-                if (dotPtr) {
-                    const dot = Module.UTF8ToString(dotPtr);
-                    freeString(dotPtr);
-                    const viz = new Viz();
-                    viz.renderSVGElement(dot)
-                        .then(element => {
-                            const treeContainer = document.getElementById('tree-container');
-                            treeContainer.innerHTML = '';
-                            treeContainer.appendChild(element);
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
-                }
-            }
-
-            window.addEventListener('unload', () => {
-                if (tree) {
-                    deleteTree(tree);
-                }
-            });
-        };
-    </script>-->
 </body>
 </html>

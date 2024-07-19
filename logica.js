@@ -1,4 +1,7 @@
-Module.onRuntimeInitialized = () => {
+//let Module;
+//let createTree, insert, deleteTree, toDot, freeString, tree;
+ Module.onRuntimeInitialized = () => {
+    
     const createTree = Module.cwrap('create_tree', 'number', ['number']);
     const insert = Module.cwrap('Insert', null, ['number', 'number']);
     const deleteTree = Module.cwrap('delete_tree', null, ['number']);
@@ -8,7 +11,7 @@ Module.onRuntimeInitialized = () => {
     let tree = null;
 
     document.getElementById('create').addEventListener('click', () => {
-        const order = parseInt(document.getElementById('order').value) || 2;
+        const order = parseInt(document.getElementById('maxGrado').value) || 2;
         if (tree) {
             deleteTree(tree);
         }
@@ -17,7 +20,7 @@ Module.onRuntimeInitialized = () => {
         visualizeTree();
     });
 
-    document.getElementById('insert').addEventListener('click', () => {
+    document.getElementById('botonInsertar').addEventListener('click', () => {
         if (!tree) {
             alert('Create a tree first!');
             return;
@@ -50,6 +53,7 @@ Module.onRuntimeInitialized = () => {
             const viz = new Viz();
             viz.renderSVGElement(dot)
                 .then(element => {
+                    //const treeContainer = document.getElementById('tree-container');
                     const treeContainer = document.getElementById('tree-container');
                     treeContainer.innerHTML = '';
                     treeContainer.appendChild(element);
@@ -63,6 +67,11 @@ Module.onRuntimeInitialized = () => {
     window.addEventListener('unload', () => {
         if (tree) {
             deleteTree(tree);
+            tree=null;
         }
     });
+
+
+
 };
+ 
