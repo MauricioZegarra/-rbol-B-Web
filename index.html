@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árbol B Interactivo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <button id="menuToggle">Menú</button>
+        </nav>
+        <h1>ARBOLES B</h1>
+        <nav>
+            <button id="shareButton">Compartir</button>
+        </nav>
+    </header>
+
+    <main>
+        <aside id="sidebar">
+            <div class="grupo-control">
+                <h3>Grado</h3>
+                <label for="maxGrado">Grado máximo (3-7):</label>
+                <input type="number" id="maxGrado" min="3" max="7" value="3">
+            </div>
+            <div class="grupo-control">
+                <button  id="create" >crear </button>
+            
+                <button id="delete" >eliminar</button>
+
+            </div>
+            <div class="grupo-control">
+                <h3>Operaciones</h3>
+                <div class="operacion">
+                    <input type="number" id="key" placeholder="Valor">
+                    <button id="botonInsertar" >Insertar</button>
+                </div>
+                <div class="operacion">
+                    <input type="number" id="eliminarValor" placeholder="Valor">
+                    <button id="botonEliminar">Eliminar</button>
+                </div>
+                <div class="operacion">
+                    <input type="number" id="buscarValor" placeholder="Valor">
+                    <button id="botonBuscar">Buscar</button>
+                </div>
+            </div>
+        </aside>
+
+        <section id="contenidoPrincipal">
+
+            <div id="visualizacionArbol">
+                <div id="tree-container">
+
+                </div>
+            </div>
+            
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Árbol B UNSA. Todos los derechos reservados.</p>
+    </footer>
+
+
+    <script src="arbol.js"></script>
+    <script src="logica.js"></script>
+</body>
+</html>
