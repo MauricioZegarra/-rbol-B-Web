@@ -23,7 +23,8 @@ struct Node {
     ~Node();
 
     void to_dot(ostringstream& oss, int& nodeCount) const;  // Añadido
-    int Remove(T value);
+    bool Remove(T value);
+    bool Search(T value) const;
 };
 
 // Node implementation
@@ -168,6 +169,53 @@ void Node<T>::to_dot(ostringstream& oss, int& nodeCount) const {
 }
 
 template <class T>
+bool Node<T>::Search(T value) const {
+    int i = 0;
+    while (i < NumbersOfKeys && value > keys[i])
+        i++;
+
+    if (keys[i] == value)
+        return true;
+
+    if (childs[i] == nullptr)
+        return false;
+
+    return childs[i]->Search(value);
+}
+
+template <class T>
+bool Node<T>::Remove(T value) {
+    int i = 0;
+    while (i < NumbersOfKeys && keys[i] < value)
+        i++;
+    
+    if (i < NumbersOfKeys && keys[i] == value) {
+        if (childs[i] == nullptr) {
+            for (int j = i + 1; j < NumbersOfKeys; ++j)
+                keys[j - 1] = keys[j];
+            NumbersOfKeys--;
+            position--;
+            return true;
+        } else {
+            // Handle the case when the node is not a leaf
+            // Replace the value with the largest value in the left subtree
+            Node<T>* predecessor = childs[i];
+            while (predecessor->childs[predecessor->NumbersOfKeys] != nullptr)
+                predecessor = predecessor->childs[predecessor->NumbersOfKeys];
+
+            T predecessorValue = predecessor->keys[predecessor->NumbersOfKeys - 1];
+            keys[i] = predecessorValue;
+            return childs[i]->Remove(predecessorValue);
+        }
+    } else {
+        if (childs[i] == nullptr)
+            return false;
+        else
+            return childs[i]->Remove(value);
+    }
+}
+
+template <class T>
 class BTree {
 private:
     Node<T>* Root;
@@ -181,6 +229,9 @@ public:
     ~BTree();
 
     void to_dot(ostringstream& oss) const;
+    bool Remove(T value);
+    bool Search(T value) const;
+    void Clear(Node<T>* node);
 };
 
 template <class T>
@@ -217,7 +268,17 @@ void BTree<T>::Print() const {
 
 template <class T>
 BTree<T>::~BTree() {
-    delete this->Root;
+    Clear(Root);
+}
+
+template <class T>
+void BTree<T>::Clear(Node<T>* node) {
+    if (node) {
+        for (int i = 0; i <= node->NumbersOfKeys; i++) {
+            Clear(node->childs[i]);
+        }
+        delete node;
+    }
 }
 
 template <class T>
@@ -229,6 +290,33 @@ void BTree<T>::to_dot(ostringstream& oss) const {
         Root->to_dot(oss, nodeCount);
     }
     oss << "}\n";
+}
+
+template <class T>
+bool BTree<T>::Remove(T value) {
+    if (!Root)
+        return false;
+
+    bool result = Root->Remove(value);
+
+    if (Root->NumbersOfKeys == 0) {
+        Node<T>* temp = Root;
+        if (Root->childs[0] == nullptr)
+            Root = nullptr;
+        else
+            Root = Root->childs[0];
+        delete temp;
+    }
+
+    return result;
+}
+
+template <class T>
+bool BTree<T>::Search(T value) const {
+    if (!Root)
+        return false;
+
+    return Root->Search(value);
 }
 
 extern "C" {
@@ -251,5 +339,13 @@ extern "C" {
         ostringstream oss;
         tree->to_dot(oss);
         return strdup(oss.str().c_str());
+    }
+
+    bool remove_node(BTree<int>* tree, int value) {
+        return tree->Remove(value);
+    }
+
+    bool search_node(BTree<int>* tree, int value) {
+        return tree->Search(value);
     }
 }
