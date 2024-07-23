@@ -214,7 +214,7 @@ bool Node<T>::Search(T value) const
     while (i < NumbersOfKeys && value > keys[i])
         i++;
 
-    if (keys[i] == value)
+    if (i < NumbersOfKeys && keys[i] == value)
         return true;
 
     if (childs[i] == nullptr)
