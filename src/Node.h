@@ -9,37 +9,47 @@ using namespace std;
 template <class T>
 struct Node
 {
-    int NumbersOfKeys; // number of the actual keys
-    int position = -1; // to allocate value in the appropriate place
-    T *keys;
-    Node **childs;
-    int Order; // Added to store the order dynamically
-
+    int NumbersOfKeys; // numero de claves actuales
+    int position = -1; // para asignar valores en el lugar correcto
+    T *keys;    // Arreglo de claves
+    Node **childs;  // Arreglo de punteros a los hijos
+    int Order; 
+    // Constructor para inicializar un nodo
     Node(int order);
+    // Insertar un valor en el árbol
     int Insert(T value);
+    // Dividir un nodo
     Node *split(Node *node, T *value);
     void Print();
     void PrintUtil(int height, bool checkParent);
-    int getHeight();
+    int getHeight();    // Obtener la altura del árbol
     ~Node();
-
+    // Método para convertir el árbol en un archivo .dot
     void to_dot(ostringstream &oss, int &nodeCount) const;
-    bool Remove(T value);
     bool Search(T value) const;
+
+    // Métodos para eliminar un valor del árbol
+    bool Remove(T value);
+    void fill(int idx);
+    void borrowFromPrev(int idx);
+    void borrowFromNext(int idx);
+    void merge(int idx);
+    bool isLeaf() const;
 };
 
-// Node implementation
+// Implementación de los métodos de la estructura Node
 template <class T>
 Node<T>::Node(int order) : Order(order)
 {
     this->NumbersOfKeys = 0;
     keys = new T[Order];
-    childs = new Node *[Order + 1](); // Initialize with null ptrs
+    childs = new Node *[Order + 1](); // Inicializa todos los punteros a nullptr
 }
-
+// Implementación del método insert
 template <class T>
 int Node<T>::Insert(T value)
 {
+    // Si el nodo es una hoja, insertar el valor en el nodo
     if (this->childs[0] == nullptr)
     {
         this->keys[++this->position] = value;
@@ -52,6 +62,7 @@ int Node<T>::Insert(T value)
     }
     else
     {
+        //Buscar el hijo en el que se debe insertar el valor
         int i = 0;
         for (; i < this->NumbersOfKeys && value > this->keys[i];)
         {
@@ -86,7 +97,7 @@ int Node<T>::Insert(T value)
     else
         return 0;
 }
-
+// Implementación del método split
 template <class T>
 Node<T> *Node<T>::split(Node *node, T *med)
 {
@@ -111,7 +122,7 @@ Node<T> *Node<T>::split(Node *node, T *med)
     --node->position;
     return newNode;
 }
-
+// Implementación del método Print
 template <class T>
 void Node<T>::Print()
 {
@@ -126,7 +137,7 @@ void Node<T>::Print()
     }
     cout << endl;
 }
-
+// Implementación del método PrintUtil para imprimir el árbol
 template <class T>
 void Node<T>::PrintUtil(int height, bool checkRoot)
 {
@@ -154,7 +165,7 @@ void Node<T>::PrintUtil(int height, bool checkRoot)
         }
     }
 }
-
+// Implementación del método getHeight
 template <class T>
 int Node<T>::getHeight()
 {
@@ -170,7 +181,7 @@ int Node<T>::getHeight()
         COUNT++;
     }
 }
-
+// Implementación del destructor
 template <class T>
 Node<T>::~Node()
 {
@@ -179,13 +190,13 @@ Node<T>::~Node()
         delete this->childs[i];
     delete[] childs;
 }
-
+// Implementación del método to_dot
 template <class T>
 void Node<T>::to_dot(ostringstream &oss, int &nodeCount) const
 {
     int currentNode = nodeCount++;
 
-    // Create node
+    // Crea un nodo con las claves
     oss << "node" << currentNode << "[label = \"<f0> |";
     for (int i = 0; i < this->NumbersOfKeys; i++)
     {
@@ -195,7 +206,7 @@ void Node<T>::to_dot(ostringstream &oss, int &nodeCount) const
     }
     oss << "\"];\n";
 
-    // Connect children
+    // Crea los enlaces a los hijos
     for (int i = 0; i <= this->NumbersOfKeys; i++)
     {
         if (this->childs[i])
@@ -206,7 +217,7 @@ void Node<T>::to_dot(ostringstream &oss, int &nodeCount) const
         }
     }
 }
-
+// Implementación del método Search
 template <class T>
 bool Node<T>::Search(T value) const
 {
@@ -223,41 +234,172 @@ bool Node<T>::Search(T value) const
     return childs[i]->Search(value);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+// Métodos para eliminar un valor del árbol
 template <class T>
-bool Node<T>::Remove(T value)
-{
-    int i = 0;
-    while (i < NumbersOfKeys && keys[i] < value)
-        i++;
+bool Node<T>::Remove(T value) {
+    int idx = 0;
+    while (idx < NumbersOfKeys && keys[idx] < value) {
+        idx++;
+    }
 
-    if (i < NumbersOfKeys && keys[i] == value)
-    {
-        if (childs[i] == nullptr)
-        {
-            for (int j = i + 1; j < NumbersOfKeys; ++j)
-                keys[j - 1] = keys[j];
+    if (idx < NumbersOfKeys && keys[idx] == value) {
+        // Caso 1: El valor está en el nodo actual
+        if (childs[0] == nullptr) {
+            // Caso 1a: El nodo actual es una hoja
+            for (int i = idx + 1; i < NumbersOfKeys; i++) {
+                keys[i - 1] = keys[i];
+            }
             NumbersOfKeys--;
-            position--;
             return true;
+        } else {
+            // Caso 1b: El nodo actual no es una hoja
+            if (childs[idx]->NumbersOfKeys >= (Order + 1) / 2) {
+                // Caso 2a: El predecesor tiene al menos t llaves
+                Node<T>* cur = childs[idx];
+                while (!cur->isLeaf()) {
+                    cur = cur->childs[cur->NumbersOfKeys];
+                }
+                T pred = cur->keys[cur->NumbersOfKeys - 1];
+                keys[idx] = pred;
+                return childs[idx]->Remove(pred);
+            } else if (childs[idx + 1]->NumbersOfKeys >= (Order + 1) / 2) {
+                // Caso 2b: El sucesor tiene al menos t llaves
+                Node<T>* cur = childs[idx + 1];
+                while (!cur->isLeaf()) {
+                    cur = cur->childs[0];
+                }
+                T succ = cur->keys[0];
+                keys[idx] = succ;
+                return childs[idx + 1]->Remove(succ);
+            } else {
+                // Caso 2c: Ambos hijos tienen menos de t llaves
+                merge(idx);
+                return childs[idx]->Remove(value);
+            }
         }
-        else
-        {
-            // Handle the case when the node is not a leaf
-            // Replace the value with the largest value in the left subtree
-            Node<T> *predecessor = childs[i];
-            while (predecessor->childs[predecessor->NumbersOfKeys] != nullptr)
-                predecessor = predecessor->childs[predecessor->NumbersOfKeys];
-
-            T predecessorValue = predecessor->keys[predecessor->NumbersOfKeys - 1];
-            keys[i] = predecessorValue;
-            return childs[i]->Remove(predecessorValue);
-        }
-    }
-    else
-    {
-        if (childs[i] == nullptr)
+    } else {
+        // Caso 3: El valor no está en el nodo actual
+        if (childs[0] == nullptr) {
+            // El valor no está en el árbol
             return false;
-        else
-            return childs[i]->Remove(value);
+        }
+        // Determinar si el hijo donde se supone que se encuentra el valor necesita ser rellenado
+        bool flag = ((idx == NumbersOfKeys) ? true : false);
+        // Si el hijo donde se supone que se encuentra el valor tiene menos de t llaves, rellenarlo
+        if (childs[idx]->NumbersOfKeys < (Order + 1) / 2) {
+            fill(idx);
+        }
+
+        if (flag && idx > NumbersOfKeys) {
+            return childs[idx - 1]->Remove(value);
+        } else {
+            return childs[idx]->Remove(value);
+        }
     }
+}
+// Métodos para implementar fill
+template <class T>
+void Node<T>::fill(int idx) {
+    if (idx != 0 && childs[idx - 1]->NumbersOfKeys >= (Order + 1) / 2) {
+        borrowFromPrev(idx);
+    } else if (idx != NumbersOfKeys && childs[idx + 1]->NumbersOfKeys >= (Order + 1) / 2) {
+        borrowFromNext(idx);
+    } else {
+        if (idx != NumbersOfKeys) {
+            merge(idx);
+        } else {
+            merge(idx - 1);
+        }
+    }
+}
+// Métodos para implementar borrowFromPrev
+template <class T>
+void Node<T>::borrowFromPrev(int idx) {
+    Node<T>* child = childs[idx];
+    Node<T>* sibling = childs[idx - 1];
+
+    for (int i = child->NumbersOfKeys - 1; i >= 0; --i) {
+        child->keys[i + 1] = child->keys[i];
+    }
+
+    if (!child->isLeaf()) {
+        for (int i = child->NumbersOfKeys; i >= 0; --i) {
+            child->childs[i + 1] = child->childs[i];
+        }
+    }
+
+    child->keys[0] = keys[idx - 1];
+    if (!child->isLeaf()) {
+        child->childs[0] = sibling->childs[sibling->NumbersOfKeys];
+    }
+
+    keys[idx - 1] = sibling->keys[sibling->NumbersOfKeys - 1];
+
+    child->NumbersOfKeys += 1;
+    sibling->NumbersOfKeys -= 1;
+}
+// Métodos para implementar borrowFromNext
+template <class T>
+void Node<T>::borrowFromNext(int idx) {
+    Node<T>* child = childs[idx];
+    Node<T>* sibling = childs[idx + 1];
+
+    child->keys[(child->NumbersOfKeys)] = keys[idx];
+
+    if (!(child->isLeaf())) {
+        child->childs[(child->NumbersOfKeys) + 1] = sibling->childs[0];
+    }
+
+    keys[idx] = sibling->keys[0];
+
+    for (int i = 1; i < sibling->NumbersOfKeys; ++i) {
+        sibling->keys[i - 1] = sibling->keys[i];
+    }
+
+    if (!sibling->isLeaf()) {
+        for (int i = 1; i <= sibling->NumbersOfKeys; ++i) {
+            sibling->childs[i - 1] = sibling->childs[i];
+        }
+    }
+
+    child->NumbersOfKeys += 1;
+    sibling->NumbersOfKeys -= 1;
+}
+// Métodos para que se pueda implementar merge
+template <class T>
+void Node<T>::merge(int idx) {
+    Node<T>* child = childs[idx];
+    Node<T>* sibling = childs[idx + 1];
+
+    child->keys[(child->NumbersOfKeys)] = keys[idx];
+
+    for (int i = 0; i < sibling->NumbersOfKeys; ++i) {
+        child->keys[i + child->NumbersOfKeys + 1] = sibling->keys[i];
+    }
+
+    if (!child->isLeaf()) {
+        for (int i = 0; i <= sibling->NumbersOfKeys; ++i) {
+            child->childs[i + child->NumbersOfKeys + 1] = sibling->childs[i];
+        }
+    }
+
+    for (int i = idx + 1; i < NumbersOfKeys; ++i) {
+        keys[i - 1] = keys[i];
+    }
+
+    for (int i = idx + 2; i <= NumbersOfKeys; ++i) {
+        childs[i - 1] = childs[i];
+    }
+
+    child->NumbersOfKeys += sibling->NumbersOfKeys + 1;
+    NumbersOfKeys--;
+
+    delete sibling;
+}
+// Método verificar si un nodo es una hoja
+template <class T>
+bool Node<T>::isLeaf() const {
+    return (childs[0] == nullptr);
 }
