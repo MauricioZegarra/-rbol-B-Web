@@ -21,7 +21,7 @@ public:
 };
 // Inicialización de árbol B 
 template <class T>
-BTree<T>::BTree(int order) : Order(order)
+BTree<T>::BTree(int order) : Order(order + 1)
 {
     this->Root = nullptr;
 }
@@ -63,7 +63,7 @@ void BTree<T>::Print() const
 template <class T>
 BTree<T>::~BTree()
 {
-    Clear(Root);
+    Clear(this->Root);
 }
 // Función para liberar la memoria
 template <class T>

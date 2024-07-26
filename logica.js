@@ -9,6 +9,12 @@ Module.onRuntimeInitialized = () => {
 
     let tree = null;
 
+    function limpiar() {
+        document.getElementById('key').value = '';
+        document.getElementById('eliminarValor').value = '';
+        document.getElementById('buscarValor').value = '';
+    }
+
     document.getElementById('create').addEventListener('click', () => {
         const order = parseInt(document.getElementById('maxGrado').value) || 2;
         if (tree) {
@@ -17,6 +23,8 @@ Module.onRuntimeInitialized = () => {
         tree = createTree(order);
         console.log(`Created B-Tree with order: ${order}`);
         visualizeTree();
+
+        limpiar();
     });
 
     document.getElementById('botonInsertar').addEventListener('click', () => {
@@ -29,6 +37,8 @@ Module.onRuntimeInitialized = () => {
         print(tree);
         console.log(`Inserted key: ${key}`);
         visualizeTree();
+
+        limpiar();
     });
 
     document.getElementById('botonEliminar').addEventListener('click', () => {
@@ -41,6 +51,8 @@ Module.onRuntimeInitialized = () => {
         print(tree);
         console.log(`Removed key: ${key}`);
         visualizeTree();
+
+        limpiar();
     });
 
     document.getElementById('botonBuscar').addEventListener('click', () => {
@@ -50,8 +62,11 @@ Module.onRuntimeInitialized = () => {
         }
         const key = parseInt(document.getElementById('buscarValor').value);
         const result = search(tree, key);
+
         document.getElementById('msg').innerText = result ? `Key ${key} found in the tree.` : `Key ${key} not found in the tree.`;
         console.log(`Searched for key: ${key}, found: ${result}`);
+
+        limpiar();
     });
 
     document.getElementById('delete').addEventListener('click', () => {
@@ -59,11 +74,12 @@ Module.onRuntimeInitialized = () => {
             alert('Create a tree first!');
             return;
         }
-        deleteTree(tree);
         tree = null;
         console.log('Tree deleted');
         document.getElementById('tree-container').innerHTML = '';
         document.getElementById('search-result').innerHTML = '';
+
+        limpiar();
     });
 
     function visualizeTree() {

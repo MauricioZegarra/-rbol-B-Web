@@ -20,7 +20,7 @@ extern "C"
     // Eliminación y liberación de memoria del árbol B
     void delete_tree(BTree<int> *tree)
     {
-        delete tree;
+        tree->~BTree();
     }
     // Función para convertir el árbol B en un archivo .dot
     const char *to_dot(BTree<int> *tree)
