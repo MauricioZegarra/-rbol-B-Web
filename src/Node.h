@@ -23,7 +23,6 @@ struct Node
     void Print();
     void PrintUtil(int height, bool checkParent);
     int getHeight();    // Obtener la altura del árbol
-    ~Node();
     // Método para convertir el árbol en un archivo .dot
     void to_dot(ostringstream &oss, int &nodeCount) const;
     bool Search(T value) const;
@@ -181,15 +180,6 @@ int Node<T>::getHeight()
         COUNT++;
     }
 }
-// Implementación del destructor
-template <class T>
-Node<T>::~Node()
-{
-    delete[] keys;
-    for (int i = 0; i <= this->NumbersOfKeys; ++i)
-        delete this->childs[i];
-    delete[] childs;
-}
 // Implementación del método to_dot
 template <class T>
 void Node<T>::to_dot(ostringstream &oss, int &nodeCount) const
@@ -237,6 +227,7 @@ bool Node<T>::Search(T value) const
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // Métodos para eliminar un valor del árbol
+// Implementación del método Remove
 template <class T>
 bool Node<T>::Remove(T value) {
     int idx = 0;
@@ -299,6 +290,7 @@ bool Node<T>::Remove(T value) {
         }
     }
 }
+
 // Métodos para implementar fill
 template <class T>
 void Node<T>::fill(int idx) {
@@ -314,6 +306,7 @@ void Node<T>::fill(int idx) {
         }
     }
 }
+
 // Métodos para implementar borrowFromPrev
 template <class T>
 void Node<T>::borrowFromPrev(int idx) {
@@ -340,6 +333,7 @@ void Node<T>::borrowFromPrev(int idx) {
     child->NumbersOfKeys += 1;
     sibling->NumbersOfKeys -= 1;
 }
+
 // Métodos para implementar borrowFromNext
 template <class T>
 void Node<T>::borrowFromNext(int idx) {
@@ -367,7 +361,8 @@ void Node<T>::borrowFromNext(int idx) {
     child->NumbersOfKeys += 1;
     sibling->NumbersOfKeys -= 1;
 }
-// Métodos para que se pueda implementar merge
+
+// Métodos para implementar merge
 template <class T>
 void Node<T>::merge(int idx) {
     Node<T>* child = childs[idx];
@@ -395,11 +390,11 @@ void Node<T>::merge(int idx) {
 
     child->NumbersOfKeys += sibling->NumbersOfKeys + 1;
     NumbersOfKeys--;
-
-    delete sibling;
 }
+
 // Método verificar si un nodo es una hoja
 template <class T>
 bool Node<T>::isLeaf() const {
     return (childs[0] == nullptr);
 }
+
