@@ -63,7 +63,7 @@ Module.onRuntimeInitialized = () => {
         const key = parseInt(document.getElementById('buscarValor').value);
         const result = search(tree, key);
 
-        document.getElementById('msg').innerText = result ? `Key ${key} found in the tree.` : `Key ${key} not found in the tree.`;
+        document.getElementById('msg').innerText = result ? `Valor ${key} encontrado en el arbol.` : `Valor ${key} no encontrado en el arbol.`;
         console.log(`Searched for key: ${key}, found: ${result}`);
 
         limpiar();
